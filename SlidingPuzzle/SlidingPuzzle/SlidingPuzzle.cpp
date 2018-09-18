@@ -25,7 +25,7 @@ int main() {
 
 	bool shuffle = false;
 
-	cout << "Bourd Size?" << endl;
+	cout << "Bourd Width?" << endl;
 
 	cin >> boardWidth;
 
@@ -60,8 +60,8 @@ int main() {
 
 	//Game loop
 	while (play) {
-		cout << "print, " << "shuffle, " << "solve, " << "solver, "<< " or exit" << endl;
-		char userInput[8] = {};
+		cout << "print, " << "shuffle, " << "solvebfs, " << "solvedfs, "<< " or exit" << endl;
+		char userInput[12] = {};
 		cin >> userInput;
 
 		if (strcmp(userInput, "print") == 0) {
@@ -76,7 +76,7 @@ int main() {
 			cout << "shuffled" << endl;
 		}
 
-		if (strcmp(userInput, "solve") == 0) {
+		if (strcmp(userInput, "solvebfs") == 0) {
 			while (!solveBoard(boardWidth, board, solvedBoard)) {
 				cout << "solving" << endl;
 				printBoard(boardWidth, board);
@@ -84,7 +84,7 @@ int main() {
 			cout << "solved board" << endl;
 		}
 
-		if (strcmp(userInput, "solver") == 0) {
+		if (strcmp(userInput, "solvedfs") == 0) {
 			cout << "recursive solver" << endl;
 			bool solved = false;
 
@@ -95,7 +95,7 @@ int main() {
 
 			if (solved == true) {
 				printBoard(boardWidth, board);
-				cout << "recursive solve" << endl;
+				cout << "recursive solved" << endl;
 			}
 		}
 
@@ -157,7 +157,7 @@ void shuffleBoard(int shuffleAmount, int size, int** b) {
 					{
 					case 0:
 						if (col - 1 != -1) {
-							cout << "UP" << endl;
+							//cout << "UP" << endl;
 							//Moves the piece and blank spot to each others position
 							b[col][row] = b[col - 1][row];
 							b[col - 1][row] = 0;
@@ -165,21 +165,21 @@ void shuffleBoard(int shuffleAmount, int size, int** b) {
 						break;
 					case 1:
 						if (row - 1!= -1) {
-							cout << "LEFT" << endl;
+							//cout << "LEFT" << endl;
 							b[col][row] = b[col][row - 1];
 							b[col][row - 1] = 0;
 						}
 						break;
 					case 2:
 						if (col + 1 != size) {
-							cout << "DOWN" << endl;
+							//cout << "DOWN" << endl;
 							b[col][row] = b[col + 1][row];
 							b[col + 1][row] = 0;
 						}
 						break;
 					case 3:
 						if (row + 1 != size) {
-							cout << "RIGHT" << endl;
+							//cout << "RIGHT" << endl;
 							b[col][row] = b[col][row + 1];
 							b[col][row + 1] = 0;
 						}
@@ -266,11 +266,11 @@ bool solveBoard(int size, int** b, int** solvedB)
 	}
 	else {
 		//Picks the next place to move to and moves it
-		cout << "NOT SOLVED: " << colPos << " " << rowPos << endl;
+		//cout << "NOT SOLVED: " << colPos << " " << rowPos << endl;
 		bool stuck = false;
 		for (size_t i = 0; i < 4; i++)
 		{
-			cout << moves[i] << endl;
+			//cout << moves[i] << endl;
 		}
 		bool movement = false;
 		int spotToMove = 0;
@@ -362,12 +362,6 @@ bool recursiveSolve(int size, int depth, int maxDepth, int** b, int** solvedB, b
 					{
 						solveCount++;
 					}
-
-					if (b[col][row] == 0)
-					{
-						colPos = col;
-						rowPos = row;
-					}
 				}
 			}
 
@@ -423,12 +417,11 @@ bool recursiveSolve(int size, int depth, int maxDepth, int** b, int** solvedB, b
 				depth++;
 				//Goes to next move
 				solved = recursiveSolve(size, depth, maxDepth, b, solvedB, solved);
-				if (solved == true) 
-				{
-
+				depth--;
+				if (solved == true) {
+				
 				}
-				else 
-				{
+				else {
 					//Undoes last move if not solved
 					switch (i)
 					{
@@ -465,7 +458,6 @@ bool recursiveSolve(int size, int depth, int maxDepth, int** b, int** solvedB, b
 						}
 						break;
 					}
-					depth--;
 				}
 			}
 		}
