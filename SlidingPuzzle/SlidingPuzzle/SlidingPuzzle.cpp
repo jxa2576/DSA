@@ -1,9 +1,122 @@
+//Jeb Atkinson
+//Sliding Puzzle Homework
+//DSA2
+//For viewing purposes the blank space is represented by a zero
+
 #include <iostream>
 #include <time.h>
 #include <cmath>
 
+#include "SlidingPuzzle.h"
+
 using namespace std;
 
+
+int main() {
+	//Bool for game loop;
+	bool play = true;
+
+	//2D array for play board and a solved board;
+	int **board;
+	int **solvedBoard;
+
+	int boardWidth = 4;
+	int shuffleCount = 5;
+
+	bool shuffle = false;
+
+	cout << "Bourd Size?" << endl;
+
+	cin >> boardWidth;
+
+	//set up 2d arrays
+	board = new int*[boardWidth];
+	solvedBoard = new int*[boardWidth];
+	for (size_t i = 0; i < boardWidth; i++)
+	{
+		board[i] = new int[boardWidth];
+		solvedBoard[i] = new int[boardWidth];
+	}
+
+	int num = 1;
+
+	//Creates board
+	for (size_t col = 0; col < boardWidth; col++)
+	{
+		for (size_t row = 0; row < boardWidth; row++)
+		{
+			if (num == boardWidth * boardWidth) {
+				num = 0;
+			}
+			board[col][row] = num;
+			solvedBoard[col][row] = num;
+			num++;
+		}
+	}
+
+	cout << "Sliding Puzzle:" << endl;
+
+	printBoard(boardWidth, board);
+
+	//Game loop
+	while (play) {
+		cout << "print, " << "shuffle, " << "solve, " << "solver, "<< " or exit" << endl;
+		char userInput[8] = {};
+		cin >> userInput;
+
+		if (strcmp(userInput, "print") == 0) {
+			printBoard(boardWidth, board);
+		}
+
+		if (strcmp(userInput, "shuffle") == 0) {
+			cout << "how many shuffles?" << endl;
+			cin >> shuffleCount;
+			shuffleBoard(shuffleCount, boardWidth, board);
+			printBoard(boardWidth, board);
+			cout << "shuffled" << endl;
+		}
+
+		if (strcmp(userInput, "solve") == 0) {
+			while (!solveBoard(boardWidth, board, solvedBoard)) {
+				cout << "solving" << endl;
+				printBoard(boardWidth, board);
+			}
+			cout << "solved board" << endl;
+		}
+
+		if (strcmp(userInput, "solver") == 0) {
+			cout << "recursive solver" << endl;
+			bool solved = false;
+
+			int depth = 0;
+
+			solved = recursiveSolve(boardWidth, depth, shuffleCount, board, solvedBoard, solved);
+			printBoard(boardWidth, board);
+
+			if (solved == true) {
+				printBoard(boardWidth, board);
+				cout << "recursive solve" << endl;
+			}
+		}
+
+		if (strcmp(userInput, "exit") == 0) {
+			play = false;
+		}
+	}
+
+	for (size_t i = 0; i < boardWidth; i++)
+	{
+		delete[] board[i];
+		delete[] solvedBoard[i];
+	}
+
+	delete[] board;
+	delete[] solvedBoard;
+
+	return 0;
+}
+
+//Prints board using a for loop to go through its vertices
 void printBoard(int size, int** b) {
 	cout << " " << endl;
 	for (size_t col = 0; col < size; col++)
@@ -23,12 +136,12 @@ void printBoard(int size, int** b) {
 				cout << "   ";
 			}
 		}
-
 		cout << "|" << endl;
 	}
 	cout << " " << endl;
 }
 
+//Shuffles the board, tracks the empty space, randomly picks a direction, moves it if it can
 void shuffleBoard(int shuffleAmount, int size, int** b) {
 	cout << "SHUFFLE" << endl;
 	int shuffleCount = 0;
@@ -45,6 +158,7 @@ void shuffleBoard(int shuffleAmount, int size, int** b) {
 					case 0:
 						if (col - 1 != -1) {
 							cout << "UP" << endl;
+							//Moves the piece and blank spot to each others position
 							b[col][row] = b[col - 1][row];
 							b[col - 1][row] = 0;
 						}
@@ -78,14 +192,19 @@ void shuffleBoard(int shuffleAmount, int size, int** b) {
 	}
 }
 
-bool solveBoard(int size, int** b, int** solvedB) {
-
+// Hill CLimb, BFS, 
+// Solves the board by tracking the blank spot, taking the number that should be there and subtracting it from the possible moves around it, selecting the piece that is the lowest cost
+// or closest to its "home." Doesnt work great, easily caught in loops
+bool solveBoard(int size, int** b, int** solvedB) 
+{
 	int solveCount = 0;
 	bool solved = false;
 	int colPos = size - 1;
 	int rowPos = size - 1;
+	//Stores the cost of moves
 	int moves[4] = { 0,0,0,0 };
 
+	//Finds if the board is solved and sets up movement for the blank space
 	for (size_t col = 0; col < size; col++)
 	{
 		for (size_t row = 0; row < size; row++)
@@ -146,6 +265,7 @@ bool solveBoard(int size, int** b, int** solvedB) {
 		solved = true;
 	}
 	else {
+		//Picks the next place to move to and moves it
 		cout << "NOT SOLVED: " << colPos << " " << rowPos << endl;
 		bool stuck = false;
 		for (size_t i = 0; i < 4; i++)
@@ -187,97 +307,168 @@ bool solveBoard(int size, int** b, int** solvedB) {
 			spotToMove++;
 		}
 	}
-
 	return solved;
 }
 
-bool recursiveSolve(int** b) {
-	//check if solved
-	//foreach possible move, move, call function again, use for loop
-	//1 2,4 3,5 6,8 7,13 9, 14 10, 12 11 15
+//DFS, quadtree, uses recursion to test out every possible move for the blank space given the amount of shuffles
+bool recursiveSolve(int size, int depth, int maxDepth, int** b, int** solvedB, bool solved) 
+{
+	int solveCount = 0;
+	int colPos = size - 1;
+	int rowPos = size - 1;
 
-	return true;
-}
+	printBoard(size, b);
 
-int main() {
-	bool play = true;
-
-	int **board;
-	int **solvedBoard;
-
-	int boardWidth = 4;
-	int shuffleCount = 5;
-
-	bool shuffle = false;
-
-	cout << "Bourd Size?" << endl;
-
-	cin >> boardWidth;
-
-	board = new int*[boardWidth];
-	solvedBoard = new int*[boardWidth];
-	for (size_t i = 0; i < boardWidth; i++)
+	//Checks for solved state and sets the cordinates of the blank space
+	for (size_t col = 0; col < size; col++)
 	{
-		board[i] = new int[boardWidth];
-		solvedBoard[i] = new int[boardWidth];
-	}
-
-	int num = 1;
-
-	//Creates board
-	for (size_t col = 0; col < boardWidth; col++)
-	{
-		for (size_t row = 0; row < boardWidth; row++)
+		for (size_t row = 0; row < size; row++)
 		{
-			if (num == boardWidth * boardWidth) {
-				num = 0;
+			if (b[col][row] == solvedB[col][row])
+			{
+				solveCount++;
 			}
-			board[col][row] = num;
-			solvedBoard[col][row] = num;
-			num++;
+			
+			if (b[col][row] == 0)
+			{
+				colPos = col;
+				rowPos = row;
+			}
 		}
 	}
 
-	cout << "Sliding Puzzle:" << endl;
-
-	printBoard(boardWidth, board);
-
-	while (play) {
-		cout << "print, " << "shuffle, " << "solve, " << " or exit" << endl;
-		char userInput[8] = {};
-		cin >> userInput;
-
-		if (strcmp(userInput, "print") == 0) {
-			printBoard(boardWidth, board);
-		}
-
-		if(strcmp(userInput, "shuffle") == 0) {
-			cout << "shuffle count" << endl;
-			cin >> shuffleCount;
-			shuffleBoard(shuffleCount, boardWidth, board);
-			printBoard(boardWidth, board);
-			cout << "shuffled" << endl;
-		}
-		
-		if (strcmp(userInput, "solve") == 0) {
-			while (!solveBoard(boardWidth, board, solvedBoard)) {
-				cout << "solving" << endl;
-				printBoard(boardWidth, board);
-			}
-			cout << "solved board" << endl;
-		}
-
-		if (strcmp(userInput, "exit") == 0) {
-			play = false;
-		}
+	//if solved skip over new recursive calls 
+	if (solveCount == size * size) {
+		solved = true;
+	}
+	else {
+		solveCount = 0;
 	}
 
-	for (size_t i = 0; i < boardWidth; i++)
+
+	if (solved == true) {
+
+	}
+	else 
 	{
-		delete[] board[i];
+		//For loop represents the potential moves the blank space could make
+		for (size_t i = 0; i < 4; i++)
+		{
+			for (size_t col = 0; col < size; col++)
+			{
+				for (size_t row = 0; row < size; row++)
+				{
+					if (b[col][row] == solvedB[col][row])
+					{
+						solveCount++;
+					}
+
+					if (b[col][row] == 0)
+					{
+						colPos = col;
+						rowPos = row;
+					}
+				}
+			}
+
+			if (solveCount == size * size) {
+				solved = true;
+			}
+			else {
+				solveCount = 0;
+			}
+
+			if (solved == true || depth > maxDepth)
+			{
+
+			}
+			else 
+			{
+				//Moves the blank space
+				switch (i)
+				{
+				case 0:
+					if (colPos - 1 != -1) 
+					{
+						//cout << "UP" << endl;
+						b[colPos][rowPos] = b[colPos - 1][rowPos];
+						b[colPos - 1][rowPos] = 0;
+					}
+					break;
+				case 1:
+					if (rowPos - 1 != -1) 
+					{
+						//cout << "LEFT" << endl;
+						b[colPos][rowPos] = b[colPos][rowPos - 1];
+						b[colPos][rowPos - 1] = 0;
+					}
+					break;
+				case 2:
+					if (colPos + 1 != size) 
+					{
+						//cout << "DOWN" << endl;
+						b[colPos][rowPos] = b[colPos + 1][rowPos];
+						b[colPos + 1][rowPos] = 0;
+					}
+					break;
+				case 3:
+					if (rowPos - 1 != -1) 
+					{
+						//cout << "RIGHT" << endl;
+						b[colPos][rowPos] = b[colPos][rowPos + 1];
+						b[colPos][rowPos + 1] = 0;
+					}
+					break;
+				}
+				depth++;
+				//Goes to next move
+				solved = recursiveSolve(size, depth, maxDepth, b, solvedB, solved);
+				if (solved == true) 
+				{
+
+				}
+				else 
+				{
+					//Undoes last move if not solved
+					switch (i)
+					{
+					case 0:
+						if (colPos - 1 != -1)
+						{
+							//cout << "UP" << endl;
+							b[colPos - 1][rowPos] = b[colPos][rowPos];
+							b[colPos][rowPos] = 0;
+						}
+						break;
+					case 1:
+						if (rowPos - 1 != -1)
+						{
+							//cout << "LEFT" << endl;
+							b[colPos][rowPos - 1] = b[colPos][rowPos];
+							b[colPos][rowPos] = 0;
+						}
+						break;
+					case 2:
+						if (colPos + 1 != size)
+						{
+							//cout << "DOWN" << endl;
+							b[colPos + 1][rowPos] = b[colPos][rowPos];
+							b[colPos][rowPos] = 0;
+						}
+						break;
+					case 3:
+						if (rowPos - 1 != -1)
+						{
+							//cout << "RIGHT" << endl;
+							b[colPos][rowPos + 1] = b[colPos][rowPos];
+							b[colPos][rowPos] = 0;
+						}
+						break;
+					}
+					depth--;
+				}
+			}
+		}
 	}
-
-	delete[] board;
-
-	return 0;
+	return solved;
 }
